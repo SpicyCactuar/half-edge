@@ -6,12 +6,10 @@
 #include "ArcBallWidget.h"
 #include "RenderWidget.h"
 
-// a window that displays an geometric model with controls
+// window that displays a geometric model with controls
 class RenderWindow : public QWidget {
     // subdivision[renderParameters->subdivisionNumber] is the one displayed
     std::vector<TriangleMesh> subdivisions;
-    // Used to generate subdivision file names
-    std::string surfacePathPrefix;
 
     RenderParameters* renderParameters;
 
@@ -23,6 +21,8 @@ class RenderWindow : public QWidget {
 
     QCheckBox* flatNormalsBox;
     QCheckBox* showVerticesBox;
+    QPushButton* writeHdsFile;
+    QPushButton* writeObjFile;
 
     QSlider* xTranslateSlider;
     QSlider* yTranslateSlider;
@@ -43,8 +43,7 @@ public:
     RenderWindow(
         TriangleMesh* triangleMesh,
         RenderParameters* renderParameters,
-        const std::string& windowName = "Loop Subdivision",
-        const std::string& surfacePathPrefix = ""
+        const std::string& windowName = "Half-Edge Application"
     );
 
     void resetInterface();

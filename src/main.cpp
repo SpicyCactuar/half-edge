@@ -11,7 +11,7 @@ bool isHdsFile(const std::string& rawMeshPath);
 
 bool isTriFile(const std::string& rawMeshPath);
 
-std::string extractMeshPathPrefix(const std::string& rawMeshPath);
+std::string extractMeshName(const std::string& rawMeshPath);
 
 int main(int argc, char** argv) {
     QApplication application(argc, argv);
@@ -35,8 +35,8 @@ int main(int argc, char** argv) {
 
     RenderParameters renderParameters;
 
-    RenderWindow renderWindow(&mesh, &renderParameters, argv[1], extractMeshPathPrefix(argv[1]));
-    RenderController renderController(&mesh, &renderParameters, &renderWindow);
+    RenderWindow renderWindow(&mesh, &renderParameters, argv[1]);
+    RenderController renderController(&renderParameters, &renderWindow, extractMeshName(argv[1]));
     renderWindow.resize(1200, 675);
     renderWindow.show();
 
@@ -51,11 +51,6 @@ bool isTriFile(const std::string& rawMeshPath) {
     return std::filesystem::path(rawMeshPath).extension() == ".tri";
 }
 
-std::string extractMeshPathPrefix(const std::string& rawMeshPath) {
-    const std::filesystem::path meshPath(rawMeshPath);
-    const auto outFolder = meshPath.root_path() / "out";
-    if (!exists(outFolder)) {
-        create_directories(outFolder);
-    }
-    return outFolder / meshPath.stem();
+std::string extractMeshName(const std::string& rawMeshPath) {
+    return std::filesystem::path(rawMeshPath).stem();
 }

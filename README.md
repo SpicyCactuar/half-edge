@@ -74,6 +74,5 @@ If the mesh is sufficiently large, the program stalls.
 
 ## TODOs
 
-* [ ] Implement button to output .hds and .obj file
 * [ ] Finish README
 * [ ] Parallelize subdivision computation

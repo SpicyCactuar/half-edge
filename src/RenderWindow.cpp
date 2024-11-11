@@ -8,10 +8,8 @@ RenderWindow::RenderWindow(
     // the object to be rendered
     TriangleMesh* triangleMesh,
     RenderParameters* renderParameters,
-    const std::string& windowName,
-    const std::string& surfacePathPrefix
+    const std::string& windowName
 ) : QWidget(nullptr),
-    surfacePathPrefix(surfacePathPrefix),
     renderParameters(renderParameters) {
     // Consider subdivisions[0] as first surface
     this->subdivisions = {*triangleMesh};
@@ -27,6 +25,8 @@ RenderWindow::RenderWindow(
 
     showVerticesBox = new QCheckBox("Show Vertices", this);
     flatNormalsBox = new QCheckBox("Flat Normals", this);
+    writeHdsFile = new QPushButton("Write .hds", this);
+    writeObjFile = new QPushButton("Write .obj", this);
 
     xTranslateSlider = new QSlider(Qt::Horizontal, this);
     yTranslateSlider = new QSlider(Qt::Vertical, this);
@@ -61,6 +61,8 @@ RenderWindow::RenderWindow(
     windowLayout->addWidget(modelRotatorLabel, 3, 3, 1, 1);
     windowLayout->addWidget(flatNormalsBox, 4, 3, 1, 1);
     windowLayout->addWidget(showVerticesBox, 5, 3, 1, 1);
+    windowLayout->addWidget(writeHdsFile, 6, 3, 1, 1);
+    windowLayout->addWidget(writeObjFile, 7, 3, 1, 1);
 
     // Translate Slider Row
     windowLayout->addWidget(xTranslateSlider, nStacked, 1, 1, 1);
@@ -72,7 +74,7 @@ RenderWindow::RenderWindow(
     windowLayout->addWidget(vertexSizeSlider, nStacked + 1, 1, 1, 1);
     windowLayout->addWidget(vertexSizeLabel, nStacked + 1, 2, 1, 1);
 
-    // Subvision Row
+    // Subdivision Row
     windowLayout->addWidget(subdivisionSlider, nStacked + 2, 1, 1, 1);
     windowLayout->addWidget(subdivisionLabel, nStacked + 2, 2, 1, 1);
 
@@ -90,16 +92,6 @@ void RenderWindow::resetInterface() {
         TriangleMesh subdivision = subdivisions[i - 1].subdivide();
         subdivisions.push_back(subdivision);
         std::cout << "Finished generating Subdivision " << i << "!" << std::endl;
-        std::string subdivisionFilePath = surfacePathPrefix + "_" + std::to_string(renderParameters->subdivisionNumber)
-                                          + ".hds";
-        std::ofstream subdivisionFile(subdivisionFilePath);
-        if (!subdivisionFile.good()) {
-            std::cerr << "Failed to output to file path: " << std::endl << subdivisionFilePath << std::endl <<
-                    std::endl;
-        } else {
-            subdivision.writeToFile(subdivisionFile);
-            std::cout << "Path to file: " << std::endl << subdivisionFilePath << std::endl << std::endl;
-        }
     }
     // Render target subdivision, guaranteed to be ready by this point
     renderWidget->triangleMesh = &subdivisions[renderParameters->subdivisionNumber];
@@ -111,18 +103,18 @@ void RenderWindow::resetInterface() {
     // set sliders
     // x & y translate are scaled to notional unit sphere in render widgets
     // but because the slider is defined as integer, we multiply by a 100 for all sliders
-    xTranslateSlider->setMinimum((int) (TRANSLATE_MIN * PARAMETER_SCALING));
-    xTranslateSlider->setMaximum((int) (TRANSLATE_MAX * PARAMETER_SCALING));
-    xTranslateSlider->setValue((int) (renderParameters->xTranslate * PARAMETER_SCALING));
+    xTranslateSlider->setMinimum(static_cast<int>(TRANSLATE_MIN * PARAMETER_SCALING));
+    xTranslateSlider->setMaximum(static_cast<int>(TRANSLATE_MAX * PARAMETER_SCALING));
+    xTranslateSlider->setValue(static_cast<int>(renderParameters->xTranslate * PARAMETER_SCALING));
 
-    yTranslateSlider->setMinimum((int) (TRANSLATE_MIN * PARAMETER_SCALING));
-    yTranslateSlider->setMaximum((int) (TRANSLATE_MAX * PARAMETER_SCALING));
-    yTranslateSlider->setValue((int) (renderParameters->yTranslate * PARAMETER_SCALING));
+    yTranslateSlider->setMinimum(static_cast<int>(TRANSLATE_MIN * PARAMETER_SCALING));
+    yTranslateSlider->setMaximum(static_cast<int>(TRANSLATE_MAX * PARAMETER_SCALING));
+    yTranslateSlider->setValue(static_cast<int>(renderParameters->yTranslate * PARAMETER_SCALING));
 
     // zoom slider is a logarithmic scale, so we want a narrow range
-    zoomSlider->setMinimum((int) (ZOOM_SCALE_LOG_MIN * PARAMETER_SCALING));
-    zoomSlider->setMaximum((int) (ZOOM_SCALE_LOG_MAX * PARAMETER_SCALING));
-    zoomSlider->setValue((int) (log10(renderParameters->zoomScale) * PARAMETER_SCALING));
+    zoomSlider->setMinimum(static_cast<int>(ZOOM_SCALE_LOG_MIN * PARAMETER_SCALING));
+    zoomSlider->setMaximum(static_cast<int>(ZOOM_SCALE_LOG_MAX * PARAMETER_SCALING));
+    zoomSlider->setValue(static_cast<int>(std::log10(renderParameters->zoomScale) * PARAMETER_SCALING));
 
     // subdivision slider [MINIMUM_SUBDIVISION_NUMBER, MAXIMUM_SUBDIVISION_SLIDER]
     subdivisionSlider->setMinimum(MINIMUM_SUBDIVISION_NUMBER);

@@ -1,14 +1,16 @@
 #include "RenderController.h"
 
 #include <cstdio>
+#include <filesystem>
+#include <fstream>
 
 RenderController::RenderController(
-    TriangleMesh* triangleMesh,
     RenderParameters* renderParameters,
-    RenderWindow* renderWindow)
-    : triangleMesh(triangleMesh),
-      renderParameters(renderParameters),
+    RenderWindow* renderWindow,
+    const std::string& meshName)
+    : renderParameters(renderParameters),
       renderWindow(renderWindow),
+      meshName(meshName),
       dragButton(Qt::NoButton),
       startX(-1),
       startY(-1),
@@ -54,6 +56,13 @@ RenderController::RenderController(
     // signal for check box for showing vertices
     QObject::connect(renderWindow->subdivisionSlider, SIGNAL(valueChanged(int)),
                      this, SLOT(subdivisionNumberChanged(int)));
+
+    // Output to files
+    QObject::connect(renderWindow->writeHdsFile, SIGNAL(clicked()),
+                     this, SLOT(writeToHdsFile()));
+
+    QObject::connect(renderWindow->writeObjFile, SIGNAL(clicked()),
+                     this, SLOT(writeToObjFile()));
 
     // copy the rotation matrix from the widgets to the model
     renderParameters->rotationMatrix = renderWindow->modelRotator->rotationMatrix();
@@ -132,6 +141,46 @@ void RenderController::subdivisionNumberChanged(const int number) const {
     renderParameters->subdivisionNumber = number;
 
     renderWindow->resetInterface();
+}
+
+void RenderController::writeToHdsFile() const {
+    std::cout << "Writing .hds file..." << std::endl;
+
+    const auto outFolder = std::filesystem::current_path() / "out";
+    if (!exists(outFolder) && !create_directories(outFolder)) {
+        std::cerr << "Failed to create /out folder. Abort." << std::endl << std::endl;
+    }
+
+    std::string fileStem = QString("%1_%2.hds")
+            .arg(meshName.c_str()).arg(renderParameters->subdivisionNumber).toStdString();
+    std::string outputMeshPath = outFolder / fileStem;
+    std::ofstream subdivisionFile(outputMeshPath);
+    if (!subdivisionFile.good()) {
+        std::cerr << "Failed to output: " << std::endl << outputMeshPath << std::endl << std::endl;
+    } else {
+        renderWindow->renderWidget->triangleMesh->writeToHdsFile(subdivisionFile);
+        std::cout << "Written to file: " << outputMeshPath << std::endl << std::endl;
+    }
+}
+
+void RenderController::writeToObjFile() const {
+    std::cout << "Writing .obj file..." << std::endl;
+
+    const auto outFolder = std::filesystem::current_path() / "out";
+    if (!exists(outFolder) && !create_directories(outFolder)) {
+        std::cerr << "Failed to create /out folder. Abort." << std::endl << std::endl;
+    }
+
+    std::string fileStem = QString("%1_%2.obj")
+            .arg(meshName.c_str()).arg(renderParameters->subdivisionNumber).toStdString();
+    std::string outputMeshPath = outFolder / fileStem;
+    std::ofstream subdivisionFile(outputMeshPath);
+    if (!subdivisionFile.good()) {
+        std::cerr << "Failed to output: " << std::endl << outputMeshPath << std::endl << std::endl;
+    } else {
+        renderWindow->renderWidget->triangleMesh->writeToObjFile(subdivisionFile);
+        std::cout << "Written to file: " << outputMeshPath << std::endl << std::endl;
+    }
 }
 
 void RenderController::mouseDown(int whichButton, int x, int y) {

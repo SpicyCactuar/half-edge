@@ -45,7 +45,10 @@ public:
 
     void computeNormals();
 
-    void writeToFile(std::ostream& outStream) const;
+    // Write to files
+    void writeToHdsFile(std::ostream& hdsStream) const;
+
+    void writeToObjFile(std::ostream& objStream) const;
 
 private:
     void computeCentreOfGravity();

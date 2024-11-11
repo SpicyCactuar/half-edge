@@ -10,11 +10,9 @@
 class RenderController : public QObject {
     Q_OBJECT
 
-    TriangleMesh* triangleMesh;
-
     RenderParameters* renderParameters;
-
     RenderWindow* renderWindow;
+    std::string meshName;
 
     int dragButton;
     int startX, startY;
@@ -22,9 +20,9 @@ class RenderController : public QObject {
 
 public:
     RenderController(
-        TriangleMesh* triangleMesh,
         RenderParameters* renderParameters,
-        RenderWindow* renderWindow
+        RenderWindow* renderWindow,
+        const std::string& meshName
     );
 
 public slots:
@@ -51,10 +49,14 @@ public slots:
     // slot for subdivision slider
     void subdivisionNumberChanged(int number) const;
 
+    // Output to files
+    void writeToHdsFile() const;
+
+    void writeToObjFile() const;
+
     // slots for responding to widget manipulations
     void mouseDown(int whichButton, int x, int y);
 
-    // note that Continue & End assume the button has already been set
     void mouseDrag(int x, int y);
 
     void mouseUp(int x, int y);

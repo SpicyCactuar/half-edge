@@ -459,36 +459,56 @@ void TriangleMesh::visitNeighbourhoodOf(const VertexId vertexId,
     } while (currentEdge != firstEdge);
 }
 
-void TriangleMesh::writeToFile(std::ostream& outStream) const {
-    outStream << "#" << std::endl;
-    outStream << "# Created by SpicyCactuar/half-edge" << std::endl;
-    outStream << "#" << std::endl;
-    outStream << "# Surface vertices=" << vertices.size() << " faces=" << faceVertices.size() / 3 << std::endl;
-    outStream << "#" << std::endl;
+void TriangleMesh::writeToHdsFile(std::ostream& hdsStream) const {
+    hdsStream << "# Created by SpicyCactuar/half-edge\n"
+            << "#\n"
+            << "# Surface vertices=" << vertices.size()
+            << " faces=" << faceVertices.size() / 3 << "\n#\n";
 
-    for (unsigned int vertex = 0; vertex < vertices.size(); vertex++) {
-        outStream << "Vertex " << vertex << " " << std::fixed << vertices[vertex] << std::endl;
+    for (unsigned int vertex = 0; vertex < vertices.size(); ++vertex) {
+        hdsStream << "Vertex " << vertex << " " << std::fixed << vertices[vertex] << '\n';
     }
 
-    for (unsigned int normal = 0; normal < normals.size(); normal++) {
-        outStream << "Normal " << normal << " " << std::fixed << normals[normal] << std::endl;
+    for (unsigned int normal = 0; normal < normals.size(); ++normal) {
+        hdsStream << "Normal " << normal << " " << std::fixed << normals[normal] << '\n';
     }
 
-    for (unsigned int vertex = 0; vertex < firstDirectedEdge.size(); vertex++) {
-        outStream << "FirstDirectedEdge " << vertex << " " << std::fixed << firstDirectedEdge[vertex] << std::endl;
+    for (unsigned int vertex = 0; vertex < firstDirectedEdge.size(); ++vertex) {
+        hdsStream << "FirstDirectedEdge " << vertex << " " << std::fixed << firstDirectedEdge[vertex] << '\n';
     }
 
-    for (unsigned int face = 0; face < faceVertices.size();) {
-        outStream << "Face " << face / 3 << " ";
-
-        outStream << faceVertices[face++] << " ";
-        outStream << faceVertices[face++] << " ";
-        outStream << faceVertices[face++];
-
-        outStream << std::endl;
+    for (unsigned int face = 0; face < faceVertices.size(); face += 3) {
+        hdsStream << "Face " << face / 3 << " "
+                << faceVertices[face] << " "
+                << faceVertices[face + 1] << " "
+                << faceVertices[face + 2] << '\n';
     }
 
-    for (unsigned int dirEdge = 0; dirEdge < otherHalf.size(); dirEdge++) {
-        outStream << "OtherHalf " << dirEdge << " " << otherHalf[dirEdge] << std::endl;
+    for (unsigned int dirEdge = 0; dirEdge < otherHalf.size(); ++dirEdge) {
+        hdsStream << "OtherHalf " << dirEdge << " " << otherHalf[dirEdge] << '\n';
+    }
+}
+
+void TriangleMesh::writeToObjFile(std::ostream& objStream) const {
+    objStream << "# Created by SpicyCactuar/half-edge\n"
+            << "#\n"
+            << "# Surface vertices=" << vertices.size()
+            << " faces=" << faceVertices.size() / 3 << "\n#\n";
+
+    for (const auto& v : vertices) {
+        objStream << "v " << v.x << ' ' << v.y << ' ' << v.z << std::endl;
+    }
+
+    for (const auto& vn : normals) {
+        objStream << "vn " << vn.x << ' ' << vn.y << ' ' << vn.z << std::endl;
+    }
+
+    for (size_t i = 0; i < faceVertices.size(); i += 3) {
+        // OBJ faces are 1-based, so we need to adjust the index by adding 1
+        objStream << "f "
+                << faceVertices[i] + 1 << "//" << faceVertices[i] + 1 << " "
+                << faceVertices[i + 1] + 1 << "//" << faceVertices[i + 1] + 1 << " "
+                << faceVertices[i + 2] + 1 << "//" << faceVertices[i + 2] + 1
+                << std::endl;
     }
 }
