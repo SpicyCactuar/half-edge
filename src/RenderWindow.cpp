@@ -91,7 +91,7 @@ void RenderWindow::resetInterface() {
         std::cout << "Generating Subdivision " << i << "..." << std::endl;
         TriangleMesh subdivision = subdivisions[i - 1].subdivide();
         subdivisions.push_back(subdivision);
-        std::cout << "Finished generating Subdivision " << i << "!" << std::endl;
+        std::cout << "Finished generating Subdivision " << i << std::endl;
     }
     // Render target subdivision, guaranteed to be ready by this point
     renderWidget->triangleMesh = &subdivisions[renderParameters->subdivisionNumber];
