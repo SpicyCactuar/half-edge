@@ -53,9 +53,7 @@ Newer versions of Qt might work correctly, if no breaking changes that affect th
 
 ## Showcase
 
-```
-// TODO: Record
-```
+![half-edge](https://github.com/user-attachments/assets/03991a61-96ee-4e66-b433-41b3744409dc)
 
 ## Controls
 
@@ -74,5 +72,4 @@ If the mesh is sufficiently large, the program stalls.
 
 ## TODOs
 
-* [ ] Finish README
 * [ ] Parallelize subdivision computation
