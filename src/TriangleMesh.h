@@ -70,7 +70,7 @@ private:
 
 class OtherHalfNotFound : public std::runtime_error {
 public:
-    OtherHalfNotFound(EdgeId edgeId, const Cartesian3& from, const Cartesian3& to)
+    OtherHalfNotFound(const EdgeId edgeId, const Cartesian3& from, const Cartesian3& to)
         : std::runtime_error(
             "OtherHalfNotFound:\n"
             "\tFailed to find half-edge\n"
@@ -81,7 +81,7 @@ public:
             "* The edge is disconnected -> Check whether the face of the reported edge is connected to another face in the .tri file\n"
             "* Windedness of the faces is inconsistent -> Check whether the adjacent faces have consistent windedness .tri file\n"
             "* Floating point precision issues -> Check whether from & to match values present in the .tri file") {
-    };
+    }
 };
 
 #endif
