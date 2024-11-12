@@ -57,7 +57,7 @@ private:
     static unsigned int idToIndex(EdgeId edgeId);
 
     // Computes the next halfEdge id within the face of edgeId
-    static EdgeId nextIdInFace(unsigned int edgeId);
+    static EdgeId nextIdInFace(EdgeId edgeId);
 
     // Returns <edge[from], edge[to]>
     std::pair<VertexId, VertexId> vertexIndicesOf(EdgeId edgeId) const;

@@ -44,10 +44,10 @@ bool TriangleMesh::readHdsFile(std::istream& hdsFile) {
         if (token == "#") {
             hdsFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
         } else if (token == "Vertex") {
-            unsigned int vertexID;
-            hdsFile >> vertexID;
+            unsigned int vertexId;
+            hdsFile >> vertexId;
 
-            if (vertexID != vertices.size()) {
+            if (vertexId != vertices.size()) {
                 hdsFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
             }
 
@@ -68,7 +68,7 @@ bool TriangleMesh::readHdsFile(std::istream& hdsFile) {
 
             normals.push_back(newNormal);
         } else if (token == "FirstDirectedEdge") {
-            EdgeId fdeId;
+            unsigned int fdeId;
             hdsFile >> fdeId;
 
             if (fdeId != firstDirectedEdge.size()) {
@@ -95,10 +95,10 @@ bool TriangleMesh::readHdsFile(std::istream& hdsFile) {
             hdsFile >> newFaceVertex;
             faceVertices.push_back(newFaceVertex);
         } else if (token == "OtherHalf") {
-            unsigned int otherHalfID;
-            hdsFile >> otherHalfID;
+            unsigned int otherHalfId;
+            hdsFile >> otherHalfId;
 
-            if (otherHalfID != otherHalf.size()) {
+            if (otherHalfId != otherHalf.size()) {
                 hdsFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
             }
 
@@ -218,10 +218,10 @@ bool TriangleMesh::readTriFile(std::istream& triFile) {
 void TriangleMesh::computeNormals() {
     normals.resize(vertices.size(), {0.0f, 0.0f, 0.0f});
 
-    for (size_t faceId = 0; faceId < faceVertices.size(); faceId += 3) {
-        const VertexId pId = faceVertices[faceId];
-        const VertexId qId = faceVertices[faceId + 1];
-        const VertexId rId = faceVertices[faceId + 2];
+    for (FaceIndex face = 0; face < faceVertices.size(); face += 3) {
+        const VertexId pId = faceVertices[face];
+        const VertexId qId = faceVertices[face + 1];
+        const VertexId rId = faceVertices[face + 2];
         const auto& p = vertices[pId];
         const auto& q = vertices[qId];
         const auto& r = vertices[rId];
@@ -302,27 +302,27 @@ TriangleMesh TriangleMesh::subdivide() const {
     // edgeId -> fulledgeId
     std::vector<unsigned int> fulledges(faceVertices.size(), NO_VALUE);
     // fulledgeId -> vertexId
-    std::vector<unsigned int> fulledgeToEdgeVertex;
+    std::vector<VertexId> fulledgeToEdgeVertex;
     // subdivisionVertexId -> <halfEdge, otherHalf>
-    std::unordered_map<unsigned int, std::pair<unsigned int, unsigned int>> edgeVertexToHalves;
+    std::unordered_map<VertexId, std::pair<EdgeId, EdgeId>> edgeVertexToHalves;
 
     for (EdgeId edgeId = 0; edgeId < faceVertices.size(); edgeId++) {
         if (fulledges[edgeId] == NO_VALUE) {
-            unsigned int nextFulledgeIndex = fulledgeToEdgeVertex.size();
+            FaceIndex nextFulledgeIndex = fulledgeToEdgeVertex.size();
             // Assign fulledge to both half-edges
             fulledges[edgeId] = nextFulledgeIndex;
             fulledges[otherHalf[edgeId]] = nextFulledgeIndex;
             // avoid overlapping with existing vertices and associates vertex index to fulledge
-            unsigned int subdivisionVertexId = vertices.size() + nextFulledgeIndex;
+            VertexId subdivisionVertexId = vertices.size() + nextFulledgeIndex;
             fulledgeToEdgeVertex.push_back(subdivisionVertexId);
             edgeVertexToHalves[subdivisionVertexId] = {edgeId, otherHalf[edgeId]};
         }
     }
 
     // Compute subdivided faces
-    std::vector<unsigned int> centralFaces;
-    std::vector<unsigned int> adjacentFaces;
-    for (unsigned int faceIndex = 0; faceIndex < faceVertices.size(); faceIndex += 3) {
+    std::vector<FaceIndex> centralFaces;
+    std::vector<FaceIndex> adjacentFaces;
+    for (FaceIndex faceIndex = 0; faceIndex < faceVertices.size(); faceIndex += 3) {
         // Create vertex indices of central subdivided face
         VertexId vc0 = fulledgeToEdgeVertex[fulledges[faceIndex]];
         VertexId vc1 = fulledgeToEdgeVertex[fulledges[faceIndex + 1]];
@@ -365,7 +365,7 @@ TriangleMesh TriangleMesh::subdivide() const {
         }
 
         // Find otherHalfEdge = [to -> from]
-        for (unsigned int otherEdgeId = 0; otherEdgeId < subdivision.faceVertices.size(); otherEdgeId++) {
+        for (EdgeId otherEdgeId = 0; otherEdgeId < subdivision.faceVertices.size(); otherEdgeId++) {
             // Skip same edge
             if (otherEdgeId == edgeId) continue;
 
@@ -380,7 +380,7 @@ TriangleMesh TriangleMesh::subdivide() const {
     }
 
     // Compute new vertices spatial values (xyz)
-    for (unsigned int edgeVertexId : fulledgeToEdgeVertex) {
+    for (VertexId edgeVertexId : fulledgeToEdgeVertex) {
         const auto [halfEdge, otherHalf] = edgeVertexToHalves[edgeVertexId];
 
         const auto [v2, v1] = vertexIndicesOf(halfEdge);
@@ -395,7 +395,7 @@ TriangleMesh TriangleMesh::subdivide() const {
     }
 
     // Compute old vertices in spatial values (xyz)
-    for (unsigned int oldVertexId = 0; oldVertexId < vertices.size(); oldVertexId++) {
+    for (VertexId oldVertexId = 0; oldVertexId < vertices.size(); oldVertexId++) {
         // Reference this to make explicit that centroid calculation uses old neighbourhoods
         subdivision.vertices[oldVertexId] = this->centroidLerp(oldVertexId);
     }
@@ -445,8 +445,8 @@ void TriangleMesh::visitNeighbourhoodOf(const VertexId vertexId,
         return;
     }
 
-    unsigned int firstEdge = firstDirectedEdge[vertexId];
-    unsigned int currentEdge = firstEdge;
+    const EdgeId firstEdge = firstDirectedEdge[vertexId];
+    EdgeId currentEdge = firstEdge;
 
     // Invariant: Tail of currentEdge is vertexId, head of currentEdge != vertexId
     //            The neighbourhood of vertexId is composed of the visited vertices
