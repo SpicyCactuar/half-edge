@@ -28,82 +28,84 @@ TriangleMesh::TriangleMesh()
 }
 
 /**
- * @brief Processes the half-edge structure as-is from an .hds file
+ * @brief Processes the half-edge structure as-is from an .halfedge file
  *
- * @param hdsFile .hds half-edge file
+ * @param halfedgeFile .halfedge half-edge file
  *
  * @return whether the read was successful
  */
-bool TriangleMesh::readHdsFile(std::istream& hdsFile) {
+// TODO: Remove readBuffer
+bool TriangleMesh::readHalfedgeFile(std::istream& halfedgeFile) {
     // Read contents, discard bad lines
-    while (!hdsFile.eof()) {
+    while (!halfedgeFile.eof()) {
         char readBuffer[MAXIMUM_LINE_LENGTH];
         std::string token;
-        hdsFile >> token;
+        halfedgeFile >> token;
 
         if (token == "#") {
-            hdsFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
+            // Comment line
+            halfedgeFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
         } else if (token == "Vertex") {
             unsigned int vertexId;
-            hdsFile >> vertexId;
+            halfedgeFile >> vertexId;
 
             if (vertexId != vertices.size()) {
-                hdsFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
+                halfedgeFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
             }
 
             Cartesian3 newVertex;
-            hdsFile >> newVertex;
+            halfedgeFile >> newVertex;
 
             vertices.push_back(newVertex);
         } else if (token == "Normal") {
             unsigned int normalId;
-            hdsFile >> normalId;
+            halfedgeFile >> normalId;
 
             if (normalId != normals.size()) {
-                hdsFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
+                halfedgeFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
             }
 
             Cartesian3 newNormal;
-            hdsFile >> newNormal;
+            halfedgeFile >> newNormal;
 
             normals.push_back(newNormal);
         } else if (token == "FirstDirectedEdge") {
             unsigned int fdeId;
-            hdsFile >> fdeId;
+            halfedgeFile >> fdeId;
 
             if (fdeId != firstDirectedEdge.size()) {
-                hdsFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
+                halfedgeFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
             }
 
             unsigned int newFde;
-            hdsFile >> newFde;
+            halfedgeFile >> newFde;
 
             firstDirectedEdge.push_back(newFde);
         } else if (token == "Face") {
             unsigned int faceId;
-            hdsFile >> faceId;
+            halfedgeFile >> faceId;
 
             if (faceId != faceVertices.size() / 3) {
-                hdsFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
+                halfedgeFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
             }
 
             VertexId newFaceVertex;
-            hdsFile >> newFaceVertex;
+            halfedgeFile >> newFaceVertex;
             faceVertices.push_back(newFaceVertex);
-            hdsFile >> newFaceVertex;
+            halfedgeFile >> newFaceVertex;
             faceVertices.push_back(newFaceVertex);
-            hdsFile >> newFaceVertex;
+            halfedgeFile >> newFaceVertex;
             faceVertices.push_back(newFaceVertex);
         } else if (token == "OtherHalf") {
             unsigned int otherHalfId;
-            hdsFile >> otherHalfId;
+            halfedgeFile >> otherHalfId;
 
             if (otherHalfId != otherHalf.size()) {
-                hdsFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
+                halfedgeFile.getline(readBuffer, MAXIMUM_LINE_LENGTH);
             }
 
             unsigned int newOtherHalf;
-            hdsFile >> newOtherHalf;
+            halfedgeFile >> newOtherHalf;
             otherHalf.push_back(newOtherHalf);
         }
     }
@@ -174,7 +176,7 @@ bool TriangleMesh::readTriFile(std::istream& triFile) {
      *      - If FDE[from] already has a value, skip it
      *      - Otherwise, set FDE[from] = edge
      */
-    firstDirectedEdge.resize(vertices.size(), NO_VALUE);
+    firstDirectedEdge.assign(vertices.size(), NO_VALUE);
     for (EdgeId edgeId = 0; edgeId < faceVertices.size(); edgeId++) {
         const VertexId vertexIdFrom = faceVertices[idToIndex(edgeId)];
 
@@ -189,7 +191,7 @@ bool TriangleMesh::readTriFile(std::istream& triFile) {
     /*
      * For each edge, find and map its other half
      */
-    otherHalf.resize(faceVertices.size(), NO_VALUE);
+    otherHalf.assign(faceVertices.size(), NO_VALUE);
     for (EdgeId edgeId = 0; edgeId < faceVertices.size(); edgeId++) {
         auto [from, to] = vertexIndicesOf(edgeId);
         auto halfEdgeLookup = findHalfEdgeFor(from, to);
@@ -216,7 +218,7 @@ bool TriangleMesh::readTriFile(std::istream& triFile) {
  * Based on: https://iquilezles.org/articles/normals/
  */
 void TriangleMesh::computeNormals() {
-    normals.resize(vertices.size(), {0.0f, 0.0f, 0.0f});
+    normals.assign(vertices.size(), {0.0f, 0.0f, 0.0f});
 
     for (FaceIndex face = 0; face < faceVertices.size(); face += 3) {
         const VertexId pId = faceVertices[face];
@@ -459,33 +461,33 @@ void TriangleMesh::visitNeighbourhoodOf(const VertexId vertexId,
     } while (currentEdge != firstEdge);
 }
 
-void TriangleMesh::writeToHdsFile(std::ostream& hdsStream) const {
-    hdsStream << "# Created by SpicyCactuar/half-edge\n"
+void TriangleMesh::writeToHalfedgeFile(std::ostream& halfedgeStream) const {
+    halfedgeStream << "# Created by SpicyCactuar/half-edge\n"
             << "#\n"
             << "# Surface vertices=" << vertices.size()
             << " faces=" << faceVertices.size() / 3 << "\n#\n";
 
     for (unsigned int vertex = 0; vertex < vertices.size(); ++vertex) {
-        hdsStream << "Vertex " << vertex << " " << std::fixed << vertices[vertex] << '\n';
+        halfedgeStream << "Vertex " << vertex << " " << std::fixed << vertices[vertex] << '\n';
     }
 
     for (unsigned int normal = 0; normal < normals.size(); ++normal) {
-        hdsStream << "Normal " << normal << " " << std::fixed << normals[normal] << '\n';
+        halfedgeStream << "Normal " << normal << " " << std::fixed << normals[normal] << '\n';
     }
 
     for (unsigned int vertex = 0; vertex < firstDirectedEdge.size(); ++vertex) {
-        hdsStream << "FirstDirectedEdge " << vertex << " " << std::fixed << firstDirectedEdge[vertex] << '\n';
+        halfedgeStream << "FirstDirectedEdge " << vertex << " " << std::fixed << firstDirectedEdge[vertex] << '\n';
     }
 
     for (unsigned int face = 0; face < faceVertices.size(); face += 3) {
-        hdsStream << "Face " << face / 3 << " "
+        halfedgeStream << "Face " << face / 3 << " "
                 << faceVertices[face] << " "
                 << faceVertices[face + 1] << " "
                 << faceVertices[face + 2] << '\n';
     }
 
     for (unsigned int dirEdge = 0; dirEdge < otherHalf.size(); ++dirEdge) {
-        hdsStream << "OtherHalf " << dirEdge << " " << otherHalf[dirEdge] << '\n';
+        halfedgeStream << "OtherHalf " << dirEdge << " " << otherHalf[dirEdge] << '\n';
     }
 }
 

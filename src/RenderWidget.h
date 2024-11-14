@@ -14,6 +14,8 @@ class RenderWidget : public QOpenGLWidget {
     RenderParameters* renderParameters;
 
 public:
+    TriangleMesh* triangleMesh;
+
     RenderWidget(
         TriangleMesh* triangleMesh,
         RenderParameters* renderParameters,
@@ -27,21 +29,17 @@ protected:
 
     void paintGL();
 
-public:
-    // the geometric object to be rendered
-    TriangleMesh* triangleMesh;
-
-    void render() const;
-
-    void renderMesh(const TriangleMesh& mesh) const;
-
+private:
+    void renderMesh() const;
 
 signals:
-    void mouseDown(int whichButton, int x, int y);
+    // these are general purpose signals, which scale the drag to
+    // the notional unit sphere and pass it to the controller for handling
+    void beginScaledDrag(int whichButton, float x, float y);
 
-    void mouseDrag(int x, int y);
+    void continueScaledDrag(float x, float y);
 
-    void mouseUp(int x, int y);
+    void endScaledDrag(float x, float y);
 };
 
 #endif

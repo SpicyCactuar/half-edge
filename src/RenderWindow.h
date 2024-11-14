@@ -21,7 +21,7 @@ class RenderWindow : public QWidget {
 
     QCheckBox* flatNormalsBox;
     QCheckBox* showVerticesBox;
-    QPushButton* writeHdsFile;
+    QPushButton* writeHalfedgeFile;
     QPushButton* writeObjFile;
 
     QSlider* xTranslateSlider;
@@ -43,7 +43,7 @@ public:
     RenderWindow(
         TriangleMesh* triangleMesh,
         RenderParameters* renderParameters,
-        const std::string& windowName = "Half-Edge Application"
+        const std::string& windowName = "Half-Edge Renderer"
     );
 
     void resetInterface();

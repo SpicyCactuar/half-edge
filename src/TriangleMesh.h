@@ -16,7 +16,7 @@ typedef unsigned int FaceIndex;
  * Describes a mesh with triangular faces. The half-edge data structure
  * serves as backing mechanism.
  *
- * The mesh can be inflated using a custom .hds file (samples are provided)
+ * The mesh can be inflated using a custom .halfedge file (samples are provided)
  * and .tri triangle soup files.
  */
 class TriangleMesh {
@@ -37,21 +37,20 @@ public:
     // create 1-level subdivision
     TriangleMesh subdivide() const;
 
-    bool readHdsFile(std::istream& hdsFile);
-
-    std::optional<EdgeId> findHalfEdgeFor(VertexId from, VertexId to) const;
+    bool readHalfedgeFile(std::istream& halfedgeFile);
 
     bool readTriFile(std::istream& triFile);
 
-    void computeNormals();
-
-    // Write to files
-    void writeToHdsFile(std::ostream& hdsStream) const;
+    void writeToHalfedgeFile(std::ostream& halfedgeStream) const;
 
     void writeToObjFile(std::ostream& objStream) const;
 
 private:
     void computeCentreOfGravity();
+
+    void computeNormals();
+
+    std::optional<EdgeId> findHalfEdgeFor(VertexId from, VertexId to) const;
 
     // Transforms edgeId to the index for the edge [x -> edge[to]]
     static unsigned int idToIndex(EdgeId edgeId);

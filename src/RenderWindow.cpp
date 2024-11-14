@@ -5,7 +5,6 @@
 #include "RenderParameters.h"
 
 RenderWindow::RenderWindow(
-    // the object to be rendered
     TriangleMesh* triangleMesh,
     RenderParameters* renderParameters,
     const std::string& windowName
@@ -25,7 +24,7 @@ RenderWindow::RenderWindow(
 
     showVerticesBox = new QCheckBox("Show Vertices", this);
     flatNormalsBox = new QCheckBox("Flat Normals", this);
-    writeHdsFile = new QPushButton("Write .hds", this);
+    writeHalfedgeFile = new QPushButton("Write .halfedge", this);
     writeObjFile = new QPushButton("Write .obj", this);
 
     xTranslateSlider = new QSlider(Qt::Horizontal, this);
@@ -61,7 +60,7 @@ RenderWindow::RenderWindow(
     windowLayout->addWidget(modelRotatorLabel, 3, 3, 1, 1);
     windowLayout->addWidget(flatNormalsBox, 4, 3, 1, 1);
     windowLayout->addWidget(showVerticesBox, 5, 3, 1, 1);
-    windowLayout->addWidget(writeHdsFile, 6, 3, 1, 1);
+    windowLayout->addWidget(writeHalfedgeFile, 6, 3, 1, 1);
     windowLayout->addWidget(writeObjFile, 7, 3, 1, 1);
 
     // Translate Slider Row
@@ -81,11 +80,8 @@ RenderWindow::RenderWindow(
     resetInterface();
 }
 
-// routine to reset the interface
 // sets every visual control to match the model
-// gets called by the controller after each change in the model
 void RenderWindow::resetInterface() {
-    // RenderWindow::ResetInterface()
     // Check if subdivisions need to be generated
     for (unsigned int i = subdivisions.size(); i <= renderParameters->subdivisionNumber; i++) {
         std::cout << "Generating Subdivision " << i << "..." << std::endl;

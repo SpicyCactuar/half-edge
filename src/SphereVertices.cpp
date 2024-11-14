@@ -8,9 +8,7 @@
 #include <GL/gl.h>
 #endif
 
-#define N_SPHERE_VERTICES 84
-
-std::array<std::array<float, 3>, N_SPHERE_VERTICES> sphereVert{
+constexpr std::array<std::array<float, 3>, 84> sphereVert{
     {
         {0, 0, -1},
         {0.5, 0, -0.86603},
@@ -102,7 +100,7 @@ std::array<std::array<float, 3>, N_SPHERE_VERTICES> sphereVert{
 void renderWireframeSphereOutline() {
     // draw a circle around the edge of the sphere
     glBegin(GL_LINE_LOOP);
-    for (int j = 3; j < N_SPHERE_VERTICES; j += 7) {
+    for (int j = 3; j < sphereVert.size(); j += 7) {
         glVertex3f(sphereVert[j][0], sphereVert[j][1], 0.5);
     }
     glEnd();
@@ -122,7 +120,7 @@ void renderWireframeSphere() {
     for (int i = 1; i < 6; i++) {
         // loop for horizontals
         glBegin(GL_LINE_LOOP);
-        for (int j = i; j < N_SPHERE_VERTICES; j += 7) {
+        for (int j = i; j < sphereVert.size(); j += 7) {
             glVertex3fv(sphereVert[j].data());
         }
         glEnd();

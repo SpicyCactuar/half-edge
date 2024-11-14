@@ -1,7 +1,8 @@
-#define ARCBALL_WIDGET_SIZE 100
-
 #include "ArcBallWidget.h"
+
 #include "SphereVertices.h"
+
+#define ARCBALL_WIDGET_SIZE 100
 
 ArcBallWidget::ArcBallWidget(QWidget* parent)
     : QOpenGLWidget(parent) {
@@ -9,7 +10,7 @@ ArcBallWidget::ArcBallWidget(QWidget* parent)
     setFixedSize(QSize(ARCBALL_WIDGET_SIZE, ARCBALL_WIDGET_SIZE));
 }
 
-Matrix4 ArcBallWidget::rotationMatrix() {
+Matrix4 ArcBallWidget::rotationMatrix() const {
     return arcBall.getRotation();
 }
 

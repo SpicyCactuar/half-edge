@@ -1,7 +1,7 @@
 # Half Edge
 
 Qt application that displays triangle meshes backed by half-edge data structure.
-The program supports triangle soup (`.tri`) and custom half-edge (`.hds`) files, with samples being provided.
+The program supports triangle soup (`.tri`) and custom half-edge (`.halfedge`) files, with samples being provided.
 In addition, the mesh can be subdivided using the loop subdivision technique.
 
 ## Project Structure
@@ -11,9 +11,10 @@ half-edge/
 ├── src/                   # Source code
 ├── assets/                # Static assets
     ├── tri                # .tri files
-    ├── hds                # .hds files
+    ├── halfedge           # .halfedge files
 ├── build/                 # Generated build files
 ├── bin/                   # Generated executable files
+├── out/                   # Generated output files
 ├── half-edge.pro          # QMake project
 └── README.md              # Project README
 ```
@@ -28,7 +29,7 @@ make
 ## Run
 
 ```bash
-bin/half-edge <.tri or .hds file>
+bin/half-edge <.tri or .halfedge file>
 ```
 
 Example `.tri`:
@@ -37,10 +38,10 @@ Example `.tri`:
 bin/half-edge assets/tri/cube.tri
 ```
 
-Example `.hds`:
+Example `.halfedge`:
 
 ```bash
-bin/half-edge assets/hds/cube.hds
+bin/half-edge assets/halfedge/cube.halfedge
 ```
 
 ## Technologies
@@ -72,4 +73,5 @@ If the mesh is sufficiently large, the program stalls.
 
 ## TODOs
 
+* [ ] Implement arcball controls for window
 * [ ] Parallelize subdivision computation

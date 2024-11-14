@@ -32,7 +32,7 @@ void RenderWidget::resizeGL(const int width, const int height) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
     // we want to capture a sphere of radius 1.0 without distortion
     // so we set the ortho projection based on whether the window is portrait (> 1.0) or landscape
@@ -46,10 +46,6 @@ void RenderWidget::resizeGL(const int width, const int height) {
 }
 
 void RenderWidget::paintGL() {
-    render();
-}
-
-void RenderWidget::render() const {
     glEnable(GL_DEPTH_TEST);
 
     glClearColor(0.8, 0.8, 0.6, 1.0);
@@ -75,13 +71,11 @@ void RenderWidget::render() const {
     // apply rotation matrix from arcball
     glMultMatrixf(reinterpret_cast<GLfloat*>(renderParameters->rotationMatrix.columnMajor().coordinates));
 
-    // tell the object to draw itself,
-    // passing in the render parameters for reference
-    renderMesh(*triangleMesh);
+    // render triangle mesh
+    renderMesh();
 }
 
-void RenderWidget::renderMesh(const TriangleMesh& mesh) const {
-    // Render()
+void RenderWidget::renderMesh() const {
     // Ideally, we would apply a global transformation to the object, but sadly that breaks down
     // when we want to scale things, as unless we normalise the normal vectors, we end up affecting
     // the illumination.  Known solutions include:
@@ -93,10 +87,10 @@ void RenderWidget::renderMesh(const TriangleMesh& mesh) const {
     // Inside a game engine, zoom usually doesn't apply. Normalisation of normal vectors is expensive,
     // so we will choose option 2.
     float scale = renderParameters->zoomScale;
-    scale /= mesh.objectSize;
+    scale /= triangleMesh->objectSize;
     glScalef(scale, scale, scale);
 
-    const Cartesian3 centreOfGravity = mesh.centreOfGravity;
+    const Cartesian3 centreOfGravity = triangleMesh->centreOfGravity;
     glTranslatef(-centreOfGravity.x, -centreOfGravity.y, -centreOfGravity.z);
 
     // render triangles
@@ -106,11 +100,11 @@ void RenderWidget::renderMesh(const TriangleMesh& mesh) const {
     glColor3f(1.0, 1.0, 1.0);
 
     // loop through the faces
-    for (unsigned int face = 0; face < mesh.faceVertices.size(); face += 3) {
+    for (unsigned int face = 0; face < triangleMesh->faceVertices.size(); face += 3) {
         if (renderParameters->useFlatNormals) {
-            const auto& p = mesh.vertices[mesh.faceVertices[face]];
-            const auto& q = mesh.vertices[mesh.faceVertices[face + 1]];
-            const auto& r = mesh.vertices[mesh.faceVertices[face + 2]];
+            const auto& p = triangleMesh->vertices[triangleMesh->faceVertices[face]];
+            const auto& q = triangleMesh->vertices[triangleMesh->faceVertices[face + 1]];
+            const auto& r = triangleMesh->vertices[triangleMesh->faceVertices[face + 2]];
 
             // Compute flat face normal
             Cartesian3 pq = q - p;
@@ -121,20 +115,20 @@ void RenderWidget::renderMesh(const TriangleMesh& mesh) const {
         }
 
         for (unsigned int vertex = face; vertex < face + 3; vertex++) {
-            const auto faceVertex = mesh.faceVertices[vertex];
+            const auto faceVertex = triangleMesh->faceVertices[vertex];
             if (!renderParameters->useFlatNormals) {
                 // hard assumption: we have enough normals
                 glNormal3f(
-                    mesh.normals[faceVertex].x * scale,
-                    mesh.normals[faceVertex].y * scale,
-                    mesh.normals[faceVertex].z * scale
+                    triangleMesh->normals[faceVertex].x * scale,
+                    triangleMesh->normals[faceVertex].y * scale,
+                    triangleMesh->normals[faceVertex].z * scale
                 );
             }
 
             glVertex3f(
-                mesh.vertices[faceVertex].x,
-                mesh.vertices[faceVertex].y,
-                mesh.vertices[faceVertex].z
+                triangleMesh->vertices[faceVertex].x,
+                triangleMesh->vertices[faceVertex].y,
+                triangleMesh->vertices[faceVertex].z
             );
         }
     }
@@ -148,7 +142,7 @@ void RenderWidget::renderMesh(const TriangleMesh& mesh) const {
     glDisable(GL_LIGHTING);
 
     // loop through the vertices
-    for (const auto& vertex : mesh.vertices) {
+    for (const auto& vertex : triangleMesh->vertices) {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glTranslatef(vertex.x, vertex.y, vertex.z);

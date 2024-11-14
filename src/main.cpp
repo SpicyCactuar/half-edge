@@ -7,7 +7,7 @@
 #include "RenderParameters.h"
 #include "RenderController.h"
 
-bool isHdsFile(const std::string& rawMeshPath);
+bool isHalfedgeFile(const std::string& rawMeshPath);
 
 bool isTriFile(const std::string& rawMeshPath);
 
@@ -25,9 +25,9 @@ int main(int argc, char** argv) {
 
     std::ifstream meshFile(argv[1]);
 
-    // File is assumed to be .hds or .tri
+    // File is assumed to be .halfedge or .tri
     if (!meshFile.good() ||
-        (isHdsFile(argv[1]) && !mesh.readHdsFile(meshFile)) ||
+        (isHalfedgeFile(argv[1]) && !mesh.readHalfedgeFile(meshFile)) ||
         (isTriFile(argv[1]) && !mesh.readTriFile(meshFile))) {
         std::cout << "Read failed for object " << argv[1] << std::endl;
         return 0;
@@ -43,8 +43,8 @@ int main(int argc, char** argv) {
     return application.exec();
 }
 
-bool isHdsFile(const std::string& rawMeshPath) {
-    return std::filesystem::path(rawMeshPath).extension() == ".hds";
+bool isHalfedgeFile(const std::string& rawMeshPath) {
+    return std::filesystem::path(rawMeshPath).extension() == ".halfedge";
 }
 
 bool isTriFile(const std::string& rawMeshPath) {

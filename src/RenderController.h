@@ -4,7 +4,6 @@
 #include <QtGui>
 
 #include "RenderWindow.h"
-#include "TriangleMesh.h"
 #include "RenderParameters.h"
 
 class RenderController : public QObject {
@@ -15,8 +14,6 @@ class RenderController : public QObject {
     std::string meshName;
 
     int dragButton;
-    int startX, startY;
-    int vertexId;
 
 public:
     RenderController(
@@ -50,16 +47,16 @@ public slots:
     void subdivisionNumberChanged(int number) const;
 
     // Output to files
-    void writeToHdsFile() const;
+    void writeToHalfedgeFile() const;
 
     void writeToObjFile() const;
 
     // slots for responding to widget manipulations
-    void mouseDown(int whichButton, int x, int y);
+    void mouseDown(int whichButton, float x, float y);
 
-    void mouseDrag(int x, int y);
+    void mouseDrag(float x, float y);
 
-    void mouseUp(int x, int y);
+    void mouseUp(float x, float y);
 };
 
 #endif

@@ -11,10 +11,7 @@ RenderController::RenderController(
     : renderParameters(renderParameters),
       renderWindow(renderWindow),
       meshName(meshName),
-      dragButton(Qt::NoButton),
-      startX(-1),
-      startY(-1),
-      vertexId(-1) {
+      dragButton(Qt::NoButton) {
     // signals for arcballs
     QObject::connect(renderWindow->modelRotator, SIGNAL(rotationChanged()),
                      this, SLOT(objectRotationChanged()));
@@ -22,12 +19,12 @@ RenderController::RenderController(
                      this, SLOT(lightRotationChanged()));
 
     // signals for main widget to control arcball
-    QObject::connect(renderWindow->renderWidget, SIGNAL(mouseDown(int, int, int)),
-                     this, SLOT(mouseDown(int, int, int)));
-    QObject::connect(renderWindow->renderWidget, SIGNAL(mouseDrag(int, int)),
-                     this, SLOT(mouseDrag(int, int)));
-    QObject::connect(renderWindow->renderWidget, SIGNAL(mouseUp(int, int)),
-                     this, SLOT(mouseUp(int, int)));
+    QObject::connect(renderWindow->renderWidget, SIGNAL(beginScaledDrag(int, float, float)),
+                     this, SLOT(mouseDown(int, float, float)));
+    QObject::connect(renderWindow->renderWidget, SIGNAL(continueScaledDrag(float, float)),
+                     this, SLOT(mouseDrag(float, float)));
+    QObject::connect(renderWindow->renderWidget, SIGNAL(endScaledDrag(float, float)),
+                     this, SLOT(mouseUp(float, float)));
 
     // signal for zoom slider
     QObject::connect(renderWindow->zoomSlider, SIGNAL(valueChanged(int)),
@@ -58,8 +55,8 @@ RenderController::RenderController(
                      this, SLOT(subdivisionNumberChanged(int)));
 
     // Output to files
-    QObject::connect(renderWindow->writeHdsFile, SIGNAL(clicked()),
-                     this, SLOT(writeToHdsFile()));
+    QObject::connect(renderWindow->writeHalfedgeFile, SIGNAL(clicked()),
+                     this, SLOT(writeToHalfedgeFile()));
 
     QObject::connect(renderWindow->writeObjFile, SIGNAL(clicked()),
                      this, SLOT(writeToObjFile()));
@@ -82,39 +79,22 @@ void RenderController::lightRotationChanged() const {
 }
 
 void RenderController::zoomChanged(const int value) const {
-    float newZoomScale = std::pow(10.0, static_cast<float>(value) / 100.0f);
-
-    if (newZoomScale < ZOOM_SCALE_MIN) {
-        newZoomScale = ZOOM_SCALE_MIN;
-    } else if (newZoomScale > ZOOM_SCALE_MAX) {
-        newZoomScale = ZOOM_SCALE_MAX;
-    }
-
-    renderParameters->zoomScale = newZoomScale;
+    renderParameters->zoomScale =
+            std::clamp(std::pow(10.0f, static_cast<float>(value) / 100.0f), ZOOM_SCALE_MIN, ZOOM_SCALE_MAX);
 
     renderWindow->resetInterface();
 }
 
 void RenderController::xTranslateChanged(const int value) const {
-    renderParameters->xTranslate = static_cast<float>(value) / 100.0;
-
-    if (renderParameters->xTranslate < TRANSLATE_MIN) {
-        renderParameters->xTranslate = TRANSLATE_MIN;
-    } else if (renderParameters->xTranslate > TRANSLATE_MAX) {
-        renderParameters->xTranslate = TRANSLATE_MAX;
-    }
+    renderParameters->xTranslate =
+            std::clamp(static_cast<float>(value) / 100.0f, TRANSLATE_MIN, TRANSLATE_MAX);
 
     renderWindow->resetInterface();
 }
 
 void RenderController::yTranslateChanged(const int value) const {
-    renderParameters->yTranslate = static_cast<float>(value) / 100.0f;
-
-    if (renderParameters->yTranslate < TRANSLATE_MIN) {
-        renderParameters->yTranslate = TRANSLATE_MIN;
-    } else if (renderParameters->yTranslate > TRANSLATE_MAX) {
-        renderParameters->yTranslate = TRANSLATE_MAX;
-    }
+    renderParameters->yTranslate =
+            std::clamp(static_cast<float>(value) / 100.0f, TRANSLATE_MIN, TRANSLATE_MAX);;
 
     renderWindow->resetInterface();
 }
@@ -143,22 +123,22 @@ void RenderController::subdivisionNumberChanged(const int number) const {
     renderWindow->resetInterface();
 }
 
-void RenderController::writeToHdsFile() const {
-    std::cout << "Writing .hds file..." << std::endl;
+void RenderController::writeToHalfedgeFile() const {
+    std::cout << "Writing .halfedge file..." << std::endl;
 
     const auto outFolder = std::filesystem::current_path() / "out";
     if (!exists(outFolder) && !create_directories(outFolder)) {
         std::cerr << "Failed to create /out folder. Abort." << std::endl << std::endl;
     }
 
-    std::string fileStem = QString("%1_%2.hds")
+    std::string fileStem = QString("%1_%2.halfedge")
             .arg(meshName.c_str()).arg(renderParameters->subdivisionNumber).toStdString();
     std::string outputMeshPath = outFolder / fileStem;
-    std::ofstream subdivisionFile(outputMeshPath);
-    if (!subdivisionFile.good()) {
+    std::ofstream outputFile(outputMeshPath);
+    if (!outputFile.good()) {
         std::cerr << "Failed to output: " << std::endl << outputMeshPath << std::endl << std::endl;
     } else {
-        renderWindow->renderWidget->triangleMesh->writeToHdsFile(subdivisionFile);
+        renderWindow->renderWidget->triangleMesh->writeToHalfedgeFile(outputFile);
         std::cout << "Written to file: " << outputMeshPath << std::endl << std::endl;
     }
 }
@@ -174,20 +154,20 @@ void RenderController::writeToObjFile() const {
     std::string fileStem = QString("%1_%2.obj")
             .arg(meshName.c_str()).arg(renderParameters->subdivisionNumber).toStdString();
     std::string outputMeshPath = outFolder / fileStem;
-    std::ofstream subdivisionFile(outputMeshPath);
-    if (!subdivisionFile.good()) {
+    std::ofstream outputFile(outputMeshPath);
+    if (!outputFile.good()) {
         std::cerr << "Failed to output: " << std::endl << outputMeshPath << std::endl << std::endl;
     } else {
-        renderWindow->renderWidget->triangleMesh->writeToObjFile(subdivisionFile);
+        renderWindow->renderWidget->triangleMesh->writeToObjFile(outputFile);
         std::cout << "Written to file: " << outputMeshPath << std::endl << std::endl;
     }
 }
 
-void RenderController::mouseDown(int whichButton, int x, int y) {
+void RenderController::mouseDown(int whichButton, float x, float y) {
 }
 
-void RenderController::mouseDrag(int x, int y) {
+void RenderController::mouseDrag(float x, float y) {
 }
 
-void RenderController::mouseUp(int x, int y) {
+void RenderController::mouseUp(float x, float y) {
 }

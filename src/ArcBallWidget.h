@@ -15,7 +15,7 @@ public:
 
     ArcBallWidget(QWidget* parent);
 
-    Matrix4 rotationMatrix();
+    Matrix4 rotationMatrix() const;
 
 protected:
     void initializeGL();
