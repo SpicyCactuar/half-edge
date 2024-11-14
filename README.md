@@ -73,5 +73,4 @@ If the mesh is sufficiently large, the program stalls.
 
 ## TODOs
 
-* [ ] Implement arcball controls for window
 * [ ] Parallelize subdivision computation

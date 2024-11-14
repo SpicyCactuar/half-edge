@@ -52,11 +52,11 @@ public slots:
     void writeToObjFile() const;
 
     // slots for responding to widget manipulations
-    void mouseDown(int whichButton, float x, float y);
+    void beginScaledDrag(int whichButton, float x, float y);
 
-    void mouseDrag(float x, float y);
+    void continueScaledDrag(float x, float y) const;
 
-    void mouseUp(float x, float y);
+    void endScaledDrag(float x, float y);
 };
 
 #endif

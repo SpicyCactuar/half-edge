@@ -153,3 +153,37 @@ void RenderWidget::renderMesh() const {
         glPopMatrix();
     }
 }
+
+void RenderWidget::mousePressEvent(QMouseEvent* event) {
+    int whichButton = event->button();
+    const float size = width() > height() ? height() : width();
+    // scale both coordinates
+    const float x = (2.0f * event->x() - size) / size;
+    const float y = (size - 2.0f * event->y()) / size;
+
+    // force mouse buttons to allow shift-click to be the same as right-click
+    if (const int modifiers = event->modifiers();
+        modifiers & Qt::ShiftModifier) {
+        whichButton = Qt::RightButton;
+    }
+
+    emit beginScaledDrag(whichButton, x, y);
+}
+
+void RenderWidget::mouseMoveEvent(QMouseEvent* event) {
+    const float size = width() > height() ? height() : width();
+    // scale both coordinates
+    const float x = (2.0f * event->x() - size) / size;
+    const float y = (size - 2.0f * event->y()) / size;
+
+    emit continueScaledDrag(x, y);
+}
+
+void RenderWidget::mouseReleaseEvent(QMouseEvent* event) {
+    const float size = width() > height() ? height() : width();
+    // scale both coordinates
+    const float x = (2.0f * event->x() - size) / size;
+    const float y = (size - 2.0f * event->y()) / size;
+
+    emit endScaledDrag(x, y);
+}

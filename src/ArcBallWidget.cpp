@@ -75,7 +75,6 @@ void ArcBallWidget::mousePressEvent(QMouseEvent* event) {
 }
 
 void ArcBallWidget::mouseMoveEvent(QMouseEvent* event) {
-    // ArcBallWidget::mouseMoveEvent()
     const float x = event->x();
     const float y = event->y();
     const float width = this->width();

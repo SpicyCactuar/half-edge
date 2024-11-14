@@ -20,11 +20,11 @@ RenderController::RenderController(
 
     // signals for main widget to control arcball
     QObject::connect(renderWindow->renderWidget, SIGNAL(beginScaledDrag(int, float, float)),
-                     this, SLOT(mouseDown(int, float, float)));
+                     this, SLOT(beginScaledDrag(int, float, float)));
     QObject::connect(renderWindow->renderWidget, SIGNAL(continueScaledDrag(float, float)),
-                     this, SLOT(mouseDrag(float, float)));
+                     this, SLOT(continueScaledDrag(float, float)));
     QObject::connect(renderWindow->renderWidget, SIGNAL(endScaledDrag(float, float)),
-                     this, SLOT(mouseUp(float, float)));
+                     this, SLOT(endScaledDrag(float, float)));
 
     // signal for zoom slider
     QObject::connect(renderWindow->zoomSlider, SIGNAL(valueChanged(int)),
@@ -163,11 +163,44 @@ void RenderController::writeToObjFile() const {
     }
 }
 
-void RenderController::mouseDown(int whichButton, float x, float y) {
+void RenderController::beginScaledDrag(const int whichButton, const float x, const float y) {
+    // Remember drag button
+    dragButton = whichButton;
+
+    switch (dragButton) {
+        case Qt::LeftButton:
+            renderWindow->modelRotator->beginDrag(x, y);
+            break;
+        default:
+            break;
+    }
+
+    renderWindow->resetInterface();
 }
 
-void RenderController::mouseDrag(float x, float y) {
+void RenderController::continueScaledDrag(const float x, const float y) const {
+    switch (dragButton) {
+        case Qt::LeftButton:
+            renderWindow->modelRotator->continueDrag(x, y);
+            break;
+        default:
+            break;
+    }
+
+    renderWindow->resetInterface();
 }
 
-void RenderController::mouseUp(float x, float y) {
+void RenderController::endScaledDrag(const float x, const float y) {
+    switch (dragButton) {
+        case Qt::LeftButton:
+            renderWindow->modelRotator->endDrag(x, y);
+            break;
+        default:
+            break;
+    }
+
+    // Forget drag button
+    dragButton = Qt::NoButton;
+
+    renderWindow->resetInterface();
 }
