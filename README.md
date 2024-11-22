@@ -4,6 +4,8 @@ Qt application that displays triangle meshes backed by half-edge data structure.
 The program supports triangle soup (`.tri`) and custom half-edge (`.halfedge`) files, with samples being provided.
 In addition, the mesh can be subdivided using the loop subdivision technique.
 
+![half-edge](https://github.com/user-attachments/assets/03991a61-96ee-4e66-b433-41b3744409dc)
+
 ## Project Structure
 
 ```plaintext
@@ -12,9 +14,6 @@ half-edge/
 ├── assets/                # Static assets
     ├── tri                # .tri files
     ├── halfedge           # .halfedge files
-├── build/                 # Generated build files
-├── bin/                   # Generated executable files
-├── out/                   # Generated output files
 ├── half-edge.pro          # QMake project
 └── README.md              # Project README
 ```
@@ -44,18 +43,6 @@ Example `.halfedge`:
 bin/half-edge assets/halfedge/cube.halfedge
 ```
 
-## Technologies
-
-* **C++**: `>= C++17`
-* **Qt**: `5.12.x`
-* **OpenGL**: `>= 4.0`
-
-Newer versions of Qt might work correctly, if no breaking changes that affect the application were introduced.
-
-## Showcase
-
-![half-edge](https://github.com/user-attachments/assets/03991a61-96ee-4e66-b433-41b3744409dc)
-
 ## Controls
 
 | Key(s)                   | Action                             |
@@ -67,6 +54,14 @@ Newer versions of Qt might work correctly, if no breaking changes that affect th
 | `Show Vertices` Checkbox | Render spheres around vertices     |
 | `Vertex Size` Slider     | Control size of vertex spheres     |
 | `Subdivisions [0, 8]`    | Control current subdivision level  |
+
+## Technologies
+
+* **C++**: `>= C++17`
+* **Qt**: `5.12.x`
+* **OpenGL**: `>= 4.0`
+
+Newer versions of Qt might work correctly, if no breaking changes that affect the application were introduced.
 
 Subdivisions are computed lazily, but the computation occurs on the main thread.
 If the mesh is sufficiently large, the program stalls.
