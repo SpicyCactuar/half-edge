@@ -1,10 +1,10 @@
 # Half Edge
 
-Qt application that displays triangle meshes backed by half-edge data structure.
-The program supports triangle soup (`.tri`) and custom half-edge (`.halfedge`) files, with samples being provided.
-In addition, the mesh can be subdivided using the loop subdivision technique.
-
 ![half-edge](https://github.com/user-attachments/assets/03991a61-96ee-4e66-b433-41b3744409dc)
+
+Qt application that displays triangle meshes backed by the [half-edge](https://jerryyin.info/geometry-processing-algorithms/half-edge/) data structure.
+The program supports triangle soup (`.tri`) and custom half-edge (`.halfedge`) files, with samples being provided.
+In addition, the mesh can be subdivided using the [loop subdivision](https://graphics.stanford.edu/~mdfisher/subdivision.html) technique.
 
 ## Project Structure
 
